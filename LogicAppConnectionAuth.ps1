@@ -24,11 +24,11 @@ function Show-OAuthWindow {
 }
 
 try { 
-    Get-AzureRmResource | Select-Object -First 1 | Out-Null
+    Get-AzResource | Select-Object -First 1 | Out-Null
 }
 catch { 
     Write-Verbose -Message ("[{0}] - Logging into Azure" -f $(Get-Date))
-    Login-AzureRmAccount
+    Login-AzAccount
 }
 
 $connection = Get-AzureRmResource -ResourceType "Microsoft.Web/connections" -ResourceGroupName $ResourceGroupName -ResourceName $ConnectionName
@@ -41,7 +41,7 @@ $parameters = @{
 	}
 }
 
-$consentResponse = Invoke-AzureRmResourceAction -Action "listConsentLinks" -ResourceId $connection.ResourceId -Parameters $parameters -Force
+$consentResponse = Invoke-AzResourceAction -Action "listConsentLinks" -ResourceId $connection.ResourceId -Parameters $parameters -Force
 Show-OAuthWindow -URL $consentResponse.Value.Link
 
 $regex = '(code=)(.*)$'
@@ -52,8 +52,8 @@ Write-Verbose -Message ("Received an accessCode: {0}" -f $code)
 if (-Not [string]::IsNullOrEmpty($code)) {
 	$parameters = @{ }
 	$parameters.Add("code", $code)
-	Invoke-AzureRmResourceAction -Action "confirmConsentCode" -ResourceId $connection.ResourceId -Parameters $parameters -Force -ErrorAction Ignore
+	Invoke-AzResourceAction -Action "confirmConsentCode" -ResourceId $connection.ResourceId -Parameters $parameters -Force -ErrorAction Ignore
 } 
 
-$connection = Get-AzureRmResource -ResourceType "Microsoft.Web/connections" -ResourceGroupName $ResourceGroupName -ResourceName $ConnectionName
+$connection = Get-AzResource -ResourceType "Microsoft.Web/connections" -ResourceGroupName $ResourceGroupName -ResourceName $ConnectionName
 Write-Output -InputObject ("Connection status - {0}" -f  ($connection.Properties.statuses | Select-Object -First 1 -ExpandProperty Status))
