@@ -1,4 +1,6 @@
 ﻿#https://github.com/logicappsio/LogicAppConnectionAuth/blob/master/LogicAppConnectionAuth.ps1
+#Updated for new Az commands
+
 [CmdletBinding()]
 param(
     [string] $ResourceGroupName = 'YourRG',
@@ -31,7 +33,7 @@ catch {
     Login-AzAccount
 }
 
-$connection = Get-AzureRmResource -ResourceType "Microsoft.Web/connections" -ResourceGroupName $ResourceGroupName -ResourceName $ConnectionName
+$connection = Get-AzResource -ResourceType "Microsoft.Web/connections" -ResourceGroupName $ResourceGroupName -ResourceName $ConnectionName
 Write-Verbose -Message ("Connection status: {0}" -f ($connection.Properties.statuses | Select-Object -First 1 -ExpandProperty Status))
 
 $parameters = @{

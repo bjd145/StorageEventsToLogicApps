@@ -1,0 +1,35 @@
+trigger:
+  branches:
+    include:
+    - dev
+  paths:
+    include:
+    - Source/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: CopyFiles@2
+    displayName: 'Copy Source to drop'
+    inputs:
+      SourceFolder: 'Source'
+      TargetFolder: 'drop'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Schemas to drop'
+    inputs:
+      SourceFolder: 'Schemas'
+      TargetFolder: 'drop'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Scripts to drop'
+    inputs:
+      SourceFolder: 'Scripts'
+      TargetFolder: 'drop'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'drop'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'

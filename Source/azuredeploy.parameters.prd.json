@@ -3,24 +3,19 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "LogicAppName": {
-            "value": ""
+            "value": "bjdstorageprd001"
         },
         "storageAccountName": {
-            "value": ""
+            "value": "bjdtestordsa001"
         },
         "eventGridSubscriptionName": {
-            "value": ""
+            "value": "eventgridprd"
         },
         "clientId": {
             "value": ""
         },
         "clientSecret": {
-            "reference": {
-                "keyVault": {
-                    "id": "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}}"
-                },
-                "secretName": "AutomationSecret"
-            }
+            "value": ""
         },
         "tenantId": {
             "value": ""

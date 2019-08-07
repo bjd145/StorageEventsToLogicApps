@@ -19,14 +19,32 @@
         },
         "tenantid" : {
             "type": "string"
+        },
+        "integrationAccountSku": {
+            "type": "string",
+            "allowedValues": ["Free", "Basic"],
+            "defaultValue": "Basic"
         }
     },
     "variables": {
         "msteams_connection": "teams",
         "blob_connection": "azureblob",
-        "events_connection": "azureeventgrid"
+        "events_connection": "azureeventgrid",
+        "integrationAccountNname": "bjdInlineCodeRunner"
     },
     "resources": [
+        {
+            "type": "Microsoft.Logic/integrationAccounts",
+            "apiVersion": "2016-06-01",
+            "name": "[variables('integrationAccountNname')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "[parameters('integrationAccountSku')]"
+            },
+            "properties": {
+                "state": "Enabled"   
+            }
+        },
         {
             "type": "Microsoft.Storage/storageAccounts",
             "sku": {
@@ -119,8 +137,14 @@
             "name": "[parameters('LogicAppName')]",
             "apiVersion": "2017-07-01",
             "location": "[resourceGroup().location]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "state": "Enabled",
+                "integrationAccount": {
+                    "id": "[resourceId('Microsoft.Logic/integrationAccounts', variables('integrationAccountNname'))]"
+                },
                 "definition": {
                     "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
                     "contentVersion": "1.0.0.0",
@@ -161,6 +185,17 @@
                     "actions": {
                         "Condition": {
                             "actions": {
+                                "Execute_JavaScript_Code": {
+                                    "runAfter": {
+                                        "Post_message": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "JavaScriptCode",
+                                    "inputs": {
+                                        "code": "var text = workflowContext.workflow.name + \" processed file event - \" + workflowContext.trigger.outputs.body.subject\r\nreturn text;"
+                                    }
+                                },
                                 "Post_message": {
                                     "runAfter": {},
                                     "type": "ApiConnection",
@@ -227,7 +262,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
                 "[resourceId('Microsoft.Web/connections', variables('msteams_connection'))]",
                 "[resourceId('Microsoft.Web/connections', variables('events_connection'))]",
-                "[resourceId('Microsoft.Web/connections', variables('blob_connection'))]"
+                "[resourceId('Microsoft.Web/connections', variables('blob_connection'))]",
+                "[resourceId('Microsoft.Logic/integrationAccounts', variables('integrationAccountNname'))]"
             ]
         }
     ]
